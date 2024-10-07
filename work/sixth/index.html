@@ -16,6 +16,114 @@
   <script src="../../common/js/jquery.js"></script>
   <script>
     // 回答はここに書いてね
+    $(function(){
+      let pokeName = '';
+      let pokeImg = '';
+      let ballImg = '';
+
+      // 「捕まえる」失敗時の画面表示
+      let failHtml =
+      `
+        <p class="text">逃げられてしまった...</p>
+        <button class="btn mt" data-js="reset">戻る</button>
+      `;
+
+      // 「ポケモンを探す」後の画面表示
+      let encountHtml =
+      `
+        <p class="name"></p>
+        <div>
+          <img class="img" src="" alt="">
+        </div>
+        <div>
+          <button class="btn" id="catch">捕まえる</button>
+          <button class="btn" data-js="reset">逃げる</button>
+        </div>
+      `;
+
+      // 「捕まえる」成功時の画面表示
+      let doneHtml =
+      `
+        <p class="name">ゲットしました</p>
+        <div>
+          <img class="img" src="" alt="">
+        </div>
+        <button class="btn" data-js="reset">戻る</button>
+      `;
+
+      // fail時の処理
+      function error(err) {
+        console.log(err);
+        return false;
+      };
+
+      // resetボタンを押した際の処理
+      function reset() {
+        $('.wrapper').html('<button type="button" class="btn search-btn" id="pokemon_search">ポケモンを探す</button>');
+        return false;
+      };
+
+      // ポケモンを捕まえる際の処理
+      function getPokemon() {
+        if ($(this).data('js') === 'reset') {
+          reset();
+        } else {
+          if (Math.round(Math.random()) === 1) {
+            $('.wrapper').html(doneHtml);
+            $('.img').attr('src', ballImg);
+            $('.btn').click(reset);
+          } else {
+            $('.wrapper').html(failHtml);
+            $('.btn').click(reset);
+          };
+        };
+      };
+
+      // ポケモンに遭遇した際の処理
+      function encount(res) {
+        pokeName = res.names[0].name;
+
+        $('.wrapper').stop().html(encountHtml);
+        $('.img').attr('src', pokeImg);
+        $('.name').text(pokeName);
+
+        $('.btn').on('click', getPokemon);
+        return false;
+      };
+
+      // ポケモンの情報を取得する処理
+      function getPokeData(res) {
+        pokeImg = res.sprites.front_default;
+
+        $.ajax({
+          url: res.species.url,
+          method: 'GET',
+        }).done(encount).fail(error);
+      };
+
+      // モンスターボールの画像を取得する際の処理
+      function getBallImg(res) {
+        ballImg = res.sprites.default;
+        return false;
+      };
+
+      // ポケモンを探す際の処理
+      function searchPokemon() {
+        const pokeNum = Math.floor(Math.random() * 150) + 1;
+
+        $.ajax({
+          url: 'https://pokeapi.co/api/v2/item/4',
+          method: 'GET',
+        }).done(getBallImg).fail(error);
+
+        $.ajax({
+          url: 'https://pokeapi.co/api/v2/pokemon/' + pokeNum,
+          method: 'GET',
+        }).done(getPokeData).fail(error);
+      };
+
+      $('.wrapper').on('click', '#pokemon_search', searchPokemon);
+    });
   </script>
 </body>
 </html>
