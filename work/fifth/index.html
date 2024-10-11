@@ -91,15 +91,12 @@
           $('.list').children().each(function(index, element) {
             if (selectVal === 'all') {
               $(element).show();
-            } else {
-              if (selectVal === $(element).data('category-type')) {
-                $(element).show();
-              } else {
-                $(element).hide();
-              };
+              return;
             }
+
+            selectVal === $(element).data('category-type') ? $(element).show() : $(element).hide();
           });
-        }
+        };
 
         $('.select').on('change', change);
       });
